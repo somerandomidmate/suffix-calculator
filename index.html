@@ -1,90 +1,117 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Big Number Suffix Calculator</title>
+    <title>Suffix to Scientific e Notation</title>
+
+    <!-- Custom Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
     <style>
         body {
-            font-family: Arial;
-            background: linear-gradient(135deg,#e3f2fd,#f5f5f5);
+            font-family: "JetBrains Mono", monospace;
+            background: linear-gradient(135deg,#1e1e2f,#2b2b40);
+            color: white;
             padding: 40px;
             text-align: center;
         }
 
         h1 {
-            font-size: 32px;
+            font-size: 34px;
+            margin-bottom: 25px;
         }
 
         textarea {
-            width: 90%;
-            height: 80px;
+            width: 95%;
+            height: 90px;
             font-size: 20px;
-            padding: 10px;
-            border-radius: 10px;
-        }
-
-        button {
-            margin-top: 15px;
-            font-size: 20px;
-            padding: 10px 25px;
-            border-radius: 10px;
-            cursor: pointer;
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            background: #111;
+            color: #00ffcc;
         }
 
         #output {
             margin-top: 25px;
-            font-size: 22px;
+            font-size: 24px;
             font-weight: bold;
+            color: #ffd166;
+            word-wrap: break-word;
+        }
+
+        .hint {
+            margin-top: 15px;
+            font-size: 14px;
+            opacity: 0.7;
         }
     </style>
 </head>
+
 <body>
 
 <h1>Suffix to Scientific e Notation</h1>
 
-<textarea id="input" placeholder="Example: (59.8Sp, 0, -59.8Sp)"></textarea>
-<br>
-<button onclick="convert()">Convert</button>
+<textarea id="input" placeholder="Type here..."></textarea>
 
 <div id="output"></div>
 
+<div class="hint">
+Auto converts while typing • supports spaces • vectors • huge numbers
+</div>
+
 <script>
-const suffixes = {
-    K:3, M:6, B:9, T:12,
-    Qa:15, Qi:18, Sx:21, Sp:24, Oc:27, No:30,
-    De:33, UDe:36, DDe:39, TDe:42, QaDe:45, QnDe:48,
-    SxDe:51, SpDe:54, OcDe:57, NoDe:60,
-    Vt:63, UVt:66, DVt:69, TVt:72, QaVt:75, QnVt:78,
-    SxVt:81, SpVt:84, OcVt:87, NoVt:90,
-    Tg:93, UTg:96, DTg:99, TTg:102, QaTg:105,
-    QnTg:108, SxTg:111, SpTg:114, OcTg:117, NoTg:120
-};
+/*
+    Automatic suffix generator
+    Every step = +3 exponent
+*/
+
+const baseNames = [
+    "", "K", "M", "B", "T",
+    "Qa","Qi","Sx","Sp","Oc","No",
+    "De","UDe","DDe","TDe","QaDe","QnDe","SxDe","SpDe","OcDe","NoDe",
+    "Vt","UVt","DVt","TVt","QaVt","QnVt","SxVt","SpVt","OcVt","NoVt",
+    "Tg","UTg","DTg","TTg","QaTg","QnTg","SxTg","SpTg","OcTg","NoTg"
+];
+
+// generate automatically up to 10^303 (Centillion)
+let suffixes = {};
+
+for (let i = 0; i < 101; i++) {
+    let power = i * 3;
+    let name = baseNames[i] || ("e" + power); // fallback naming
+    suffixes[name] = power;
+}
 
 function normalize(num, power) {
+    if (num === 0) return "0";
+
     while (Math.abs(num) >= 10) {
         num /= 10;
         power++;
     }
-    while (Math.abs(num) < 1 && num !== 0) {
+
+    while (Math.abs(num) < 1) {
         num *= 10;
         power--;
     }
+
     return num.toFixed(6).replace(/\.?0+$/,"") + "e" + power;
 }
 
-function convert() {
-    let input = document.getElementById("input").value;
-
-    // Replace ALL occurrences automatically
-    let result = input.replace(
+function convert(text) {
+    return text.replace(
         /([-+]?\d*\.?\d+)\s*([A-Za-z]+)/g,
         (match, number, suffix) => {
             if (!(suffix in suffixes)) return match;
             return normalize(parseFloat(number), suffixes[suffix]);
         }
     );
-
-    document.getElementById("output").innerText = result;
 }
+
+// auto convert while typing
+document.getElementById("input").addEventListener("input", e => {
+    document.getElementById("output").innerText = convert(e.target.value);
+});
 </script>
 
 </body>
