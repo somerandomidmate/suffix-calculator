@@ -39,7 +39,7 @@
 </head>
 <body>
 
-<h1>Suffix to Scientific e Notation Calculator</h1>
+<h1>Suffix to Scientific e Notation</h1>
 
 <textarea id="input" placeholder="Example: (59.8Sp, 0, -59.8Sp)"></textarea>
 <br>
@@ -71,22 +71,18 @@ function normalize(num, power) {
     return num.toFixed(6).replace(/\.?0+$/,"") + "e" + power;
 }
 
-function convertOne(text) {
-    const match = text.match(/([-+]?\d*\.?\d+)([A-Za-z]+)/);
-    if (!match) return text;
-
-    let number = parseFloat(match[1]);
-    let suffix = match[2];
-
-    if (!(suffix in suffixes)) return text;
-
-    return normalize(number, suffixes[suffix]);
-}
-
 function convert() {
     let input = document.getElementById("input").value;
-    let parts = input.split(/([,()])/);
-    let result = parts.map(p => convertOne(p)).join("");
+
+    // Replace ALL occurrences automatically
+    let result = input.replace(
+        /([-+]?\d*\.?\d+)\s*([A-Za-z]+)/g,
+        (match, number, suffix) => {
+            if (!(suffix in suffixes)) return match;
+            return normalize(parseFloat(number), suffixes[suffix]);
+        }
+    );
+
     document.getElementById("output").innerText = result;
 }
 </script>
