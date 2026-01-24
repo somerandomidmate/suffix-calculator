@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Suffix to Scientific e Notation</title>
+    <title>Suffix to Scientific e Notation V1 by Arobloxplayerr123</title>
 
     <!-- Comic Neue Angular Font -->
     <style>
@@ -57,7 +57,8 @@
 <div class="hint">Created for Inaccurate Skybox ARG game. To translate suffixes to usable text in the coordinate board. Supports 1Sp, 1 Sp, "1Sp, -1Sp, 1Sp" and 1NoNgCe.</div>
 
 <script>
-// Suffix Tears
+// --------------------------
+// Tier 1 Suffixes (already defined)
 let suffixes = {};
 
 // Standard Numbers
@@ -100,7 +101,7 @@ oct.forEach((s,i)=> suffixes[s] = 243 + i*3);
 const non = ["Ng","UNg","DNg","TNg","QdNg","QnNg","SxNg","SpNg","OcNg","NoNg"];
 non.forEach((s,i)=> suffixes[s] = 273 + i*3);
 
-// Centillion Range (Ce - NoNgCe)
+// Centillion Range
 const tens = ["U","D","T","Qd","Qn","Sx","Sp","Oc","No"];
 const centBase = ["Ce","DeCe","VtCe","TgCe","qgCe","QgCe","sgCe","SgCe","OgCe","NgCe"];
 centBase.forEach((b,i)=>{
@@ -109,7 +110,44 @@ centBase.forEach((b,i)=>{
     });
 });
 
-// Parse and normalize
+// --------------------------
+// Tier 2 Suffixes (Millillion / Micrillion)
+const tier2 = {
+    Mi: 3003,       // Millillion
+    Mc: 3000000     // Micrillion
+};
+
+// Generate combinations for Tier 2
+function parseCompoundSuffix(suffix){
+    for(let key in tier2){
+        if(suffix.startsWith(key)){
+            let rest = suffix.slice(key.length);
+            let baseExp = tier2[key];
+
+            // check if the rest matches a Tier 1 suffix
+            if(suffixes[rest]) return baseExp + suffixes[rest];
+
+            // check if the rest matches Tier 1 combination (like MiSxVtQa)
+            let regex = /([A-Za-z]+)/g;
+            let matches = rest.match(regex);
+            if(matches){
+                let totalExp = baseExp;
+                matches.forEach(m=>{
+                    if(suffixes[m]) totalExp += suffixes[m];
+                });
+                return totalExp;
+            }
+
+            return baseExp; // just the tier2 itself
+        }
+    }
+
+    // fallback to Tier 1
+    return suffixes[suffix] || null;
+}
+
+// --------------------------
+// Normalize numbers
 function normalize(num,power){
     if(num===0) return "0";
     while(Math.abs(num)>=10){ num/=10; power++; }
@@ -117,19 +155,7 @@ function normalize(num,power){
     return num.toFixed(6).replace(/\.?0+$/,"")+"e"+power;
 }
 
-// Compound suffixes (ex. MiSxVtQa)
-function parseCompoundSuffix(suffix){
-    let tier2 = {Mi:3003, Mc:3000000}; // example tier2, can expand
-    for(let key in tier2){
-        if(suffix.startsWith(key)){
-            let rest = suffix.slice(key.length);
-            let baseExp = tier2[key];
-            if(suffixes[rest]) return baseExp + suffixes[rest];
-        }
-    }
-    return suffixes[suffix] || null;
-}
-
+// --------------------------
 // Convert text
 function convert(text){
     return text.replace(/([-+]?\d*\.?\d+)\s*([A-Za-z]+)/g,(m,num,suf)=>{
@@ -138,7 +164,9 @@ function convert(text){
         return normalize(parseFloat(num), exp);
     });
 }
-// Auto Update Text
+
+// --------------------------
+// Auto Update
 document.getElementById("input").addEventListener("input",e=>{
     document.getElementById("output").innerText = convert(e.target.value);
 });
