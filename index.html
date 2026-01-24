@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Suffix to Scientific e Notation V1 by Arobloxplayerr123</title>
+    <title>Suffix to Scientific e Notation</title>
 
     <!-- Comic Neue Angular Font -->
     <style>
@@ -51,14 +51,13 @@
 </head>
 <body>
 
-<h1>Suffix to Scientific e Notation</h1>
+<h1>Suffix to Scientific e Notation V1 by Arobloxplayerr123</h1>
 <textarea id="input" placeholder="Type here..."></textarea>
 <div id="output"></div>
-<div class="hint">Created for Inaccurate Skybox ARG game. To translate suffixes to usable text in the coordinate board. Supports 1Sp, 1 Sp, "1Sp, -1Sp, 1Sp" and 1NoNgCe.</div>
+<div class="hint">Created for Inaccurate Skybox ARG. Supports suffixes from k → NoNgCe. Also supports coordinates: "1Sp, -1Sp, 1Sp"</div>
 
 <script>
-// --------------------------
-// Tier 1 Suffixes (already defined)
+// Suffixes
 let suffixes = {};
 
 // Standard Numbers
@@ -110,43 +109,6 @@ centBase.forEach((b,i)=>{
     });
 });
 
-// --------------------------
-// Tier 2 Suffixes (Millillion / Micrillion)
-const tier2 = {
-    Mi: 3003,       // Millillion
-    Mc: 3000000     // Micrillion
-};
-
-// Generate combinations for Tier 2
-function parseCompoundSuffix(suffix){
-    for(let key in tier2){
-        if(suffix.startsWith(key)){
-            let rest = suffix.slice(key.length);
-            let baseExp = tier2[key];
-
-            // check if the rest matches a Tier 1 suffix
-            if(suffixes[rest]) return baseExp + suffixes[rest];
-
-            // check if the rest matches Tier 1 combination (like MiSxVtQa)
-            let regex = /([A-Za-z]+)/g;
-            let matches = rest.match(regex);
-            if(matches){
-                let totalExp = baseExp;
-                matches.forEach(m=>{
-                    if(suffixes[m]) totalExp += suffixes[m];
-                });
-                return totalExp;
-            }
-
-            return baseExp; // just the tier2 itself
-        }
-    }
-
-    // fallback to Tier 1
-    return suffixes[suffix] || null;
-}
-
-// --------------------------
 // Normalize numbers
 function normalize(num,power){
     if(num===0) return "0";
@@ -155,17 +117,14 @@ function normalize(num,power){
     return num.toFixed(6).replace(/\.?0+$/,"")+"e"+power;
 }
 
-// --------------------------
 // Convert text
 function convert(text){
     return text.replace(/([-+]?\d*\.?\d+)\s*([A-Za-z]+)/g,(m,num,suf)=>{
-        let exp = parseCompoundSuffix(suf);
-        if(exp===null) return m;
-        return normalize(parseFloat(num), exp);
+        if(!(suf in suffixes)) return m;
+        return normalize(parseFloat(num), suffixes[suf]);
     });
 }
 
-// --------------------------
 // Auto Update
 document.getElementById("input").addEventListener("input",e=>{
     document.getElementById("output").innerText = convert(e.target.value);
